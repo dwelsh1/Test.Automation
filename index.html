@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Test.automation by ObjectivityBSS</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Test.automation</h1>
+        <h2>Framework to automate tests using Selenium WebDriver</h2>
+        <a href="https://github.com/ObjectivityBSS/Test.Automation" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="testautomation" class="anchor" href="#testautomation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Test.Automation</h1>
+
+<p>Framework to automate tests using Selenium WebDriver</p>
+
+<p>Test Framework was designed in Objectivity to propose common way how people should create Selenium WebDriver tests:</p>
+
+<p>It provides following features:</p>
+
+<ul>
+<li>Possibility to Use MSTest or NUnit framework</li>
+<li>Specflow ready</li>
+<li>Written entirely in C#</li>
+<li>Contains example projects how to use it</li>
+<li>Allows to use Chrome, Firefox or Internet Explorer</li>
+<li>Extends Webdriver by additional methods like JavaScriptClick, WaitForAjax, etc.</li>
+<li>Automatically waits when locating element for specified time and conditions</li>
+<li>Page Object Pattern</li>
+<li>More common locators, e.g: "//*[<a href="https://github.com/title" class="user-mention">@title</a>='{0}' and @ms.title='{1}']"</li>
+<li>Several methods to interact with kendo controls</li>
+<li>Verify along with Assert</li>
+<li>Measures average and 90 Percentile action times</li>
+<li>DataDriven for NUnit and MSTest with examples </li>
+<li>Possibility to take full desktop screen shot</li>
+<li>Logging with NLog</li>
+<li>Files downloading (Firefox, Chrome)</li>
+<li>Ready for parallel tests execution</li>
+<li>Possibility to send SQL or MDX queries</li>
+</ul>
+
+<p>Projects examples of using Test Framework :</p>
+
+<ul>
+<li>Objectivity.Test.Automation.Tests.Features for Specflow</li>
+<li>Objectivity.Test.Automation.Tests.MsTest for MsTest</li>
+<li>Objectivity.Test.Automation.Tests.NUnit for NUnit</li>
+<li>Objectivity.Test.Automation.Tests.PageObjects for Page Object Pattern</li>
+</ul>
+
+<p>In case of problems with running tests in your internet browser remember to update version of Selenium WebDriver from Nuget packages.
+To run NUnit tests from Visual Studio remember to install NUnit TestAdapter.</p>
+
+<p>NUnit Example Test:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">namespace</span> <span class="pl-en">Objectivity.Test.Automation.Tests.NUnit.Tests</span>
+{
+    <span class="pl-k">using</span> global::NUnit.Framework;
+
+    <span class="pl-k">using</span> Objectivity.Test.Automation.Tests.PageObjects.PageObjects.TheInternet;
+
+    [Parallelizable(ParallelScope.Fixtures)]
+    <span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">JavaScriptAlertsTestsNUnit</span> : <span class="pl-k">ProjectTestBase</span>
+    {
+        [Test]
+        <span class="pl-k">public</span> <span class="pl-k">void</span> <span class="pl-en">ClickJsAlertTest</span>()
+        {
+            <span class="pl-k">var</span> internetPage = <span class="pl-k">new</span> InternetPage(<span class="pl-c1">this</span>.DriverContext).OpenHomePage();
+            <span class="pl-k">var</span> jsAlertsPage = internetPage.GoToJavaScriptAlerts();
+            jsAlertsPage.OpenJsAlert();
+            jsAlertsPage.AcceptAlert();
+            Assert.AreEqual(<span class="pl-s"><span class="pl-pds">"</span>You successfuly clicked an alert<span class="pl-pds">"</span></span>, jsAlertsPage.ResultText);
+        }
+    }
+}
+</pre></div>
+
+<p>NUnit Example Page Object:</p>
+
+<div class="highlight highlight-source-cs"><pre><span class="pl-k">namespace</span> <span class="pl-en">Objectivity.Test.Automation.Tests.PageObjects.PageObjects.TheInternet</span>
+{
+    <span class="pl-k">using</span> System;
+    <span class="pl-k">using</span> System.Globalization;
+
+    <span class="pl-k">using</span> NLog;
+
+    <span class="pl-k">using</span> Objectivity.Test.Automation.Common;
+    <span class="pl-k">using</span> Objectivity.Test.Automation.Common.Extensions;
+    <span class="pl-k">using</span> Objectivity.Test.Automation.Common.Types;
+    <span class="pl-k">using</span> Objectivity.Test.Automation.Tests.PageObjects;
+
+    <span class="pl-k">public</span> <span class="pl-k">class</span> <span class="pl-en">InternetPage</span> : <span class="pl-k">ProjectPageBase</span>
+    {
+        <span class="pl-k">private</span> <span class="pl-k">static</span> <span class="pl-k">readonly</span> Logger Logger = LogManager.GetCurrentClassLogger();
+
+        <span class="pl-c">/// &lt;<span class="pl-ent">summary</span>&gt;</span>
+        <span class="pl-c">/// Locators for elements</span>
+        <span class="pl-c">/// &lt;/<span class="pl-ent">summary</span>&gt;</span>
+        <span class="pl-k">private</span> <span class="pl-k">readonly</span> ElementLocator
+            linkLocator = <span class="pl-k">new</span> ElementLocator(Locator.CssSelector, <span class="pl-s"><span class="pl-pds">"</span>a[href='/{0}']<span class="pl-pds">"</span></span>);
+
+        <span class="pl-k">public</span> <span class="pl-en">InternetPage</span>(<span class="pl-k">DriverContext</span> <span class="pl-smi">driverContext</span>) : <span class="pl-c1">base</span>(driverContext)
+        {
+        }
+
+        <span class="pl-k">public</span> JavaScriptAlertsPage <span class="pl-en">GoToJavaScriptAlerts</span>()
+        {
+            <span class="pl-c1">this</span>.Driver.GetElement(<span class="pl-c1">this</span>.linkLocator.Evaluate(<span class="pl-s"><span class="pl-pds">"</span>javascript_alerts<span class="pl-pds">"</span></span>)).Click();
+            <span class="pl-k">return</span> <span class="pl-k">new</span> JavaScriptAlertsPage(<span class="pl-c1">this</span>.DriverContext);
+        }
+    }
+}</pre></div>
+
+<h4>
+<a id="where-to-start" class="anchor" href="#where-to-start" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Where to start?</h4>
+
+<hr>
+
+<ul>
+<li>See <a href="https://github.com/ObjectivityBSS/Test.Automation/wiki/Getting%20started">Getting started</a>.</li>
+</ul>
+
+<p>Checkout the code or get it from <a href="https://www.nuget.org/packages?q=Objectivity.Test.Automation.Common+by?tfajks">nuget.org</a></p>
+
+<ul>
+<li>Objectivity.Test.Automation.Common.NUnit <a href="https://www.nuget.org/packages/Objectivity.Test.Automation.Common.NUnit/">nuget</a>
+</li>
+<li>Objectivity.Test.Automation.Common.Features <a href="https://www.nuget.org/packages/Objectivity.Test.Automation.Common.Features/">nuget</a>
+</li>
+<li>Objectivity.Test.Automation.Common.MsTest <a href="https://www.nuget.org/packages/Objectivity.Test.Automation.Common.MsTest/">nuget</a>
+</li>
+</ul>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/ObjectivityBSS/Test.Automation/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/ObjectivityBSS/Test.Automation/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/ObjectivityBSS/Test.Automation"></a> is maintained by <a href="https://github.com/ObjectivityBSS">ObjectivityBSS</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
